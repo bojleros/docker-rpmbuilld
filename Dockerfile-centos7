@@ -1,0 +1,31 @@
+FROM centos:7
+
+COPY entry.sh /usr/local/bin/entry.sh
+
+RUN yum install -y gcc gcc-c++ \
+    libtool \
+    libtool-ltdl \
+    make \
+    cmake \
+    git \
+    pkgconfig \
+    sudo \
+    automake \
+    autoconf \
+    yum-utils \
+    rpm-build && \
+  yum clean all
+
+RUN useradd builder -u 2101 -m -G users,wheel && \
+  echo "builder ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers && \
+  chown -R builder /home/builder && \
+  chmod 755 /usr/local/bin/entry.sh
+
+USER builder
+
+ENV FLAVOR=rpmbuild OS=centos DIST=el7 GIT_HTTPS_VERIFY=true
+
+WORKDIR /sources
+
+CMD /usr/local/bin/entry.sh
+
